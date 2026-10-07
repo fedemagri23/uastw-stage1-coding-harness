@@ -1,0 +1,12 @@
+--- a/src/allocation/domain/model.py
++++ b/src/allocation/domain/model.py
+@@ -13,6 +13,9 @@
+         self.events = []  # type: List[events.Event]
+ 
+     def allocate(self, line: OrderLine) -> str:
++        for batch in self.batches:
++            if line in batch._allocations:
++                return batch.reference
+         try:
+             batch = next(b for b in sorted(self.batches) if b.can_allocate(line))
+             batch.allocate(line)

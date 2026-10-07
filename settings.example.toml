@@ -1,0 +1,26 @@
+# Example settings for the Stage 1 coding harness. No secrets are needed:
+# the model runs locally in Ollama. Copy to settings.toml to change values;
+# without settings.toml these defaults are used.
+
+[model]
+provider = "ollama"
+name = "qwen2.5-coder:7b"
+endpoint = "http://127.0.0.1:11434/api/chat"
+timeout_s = 300            # per model request; CPU-only machines are slow
+num_ctx = 16384            # context window requested from Ollama
+temperature = 0
+
+[limits]
+max_actions = 20           # tool requests per run (executed, denied or blocked)
+max_denied = 5             # denied requests before the run stops
+max_invalid_replies = 4    # unparseable / malformed model replies before the run stops
+max_model_retries = 2      # extra attempts when a model request fails
+observation_chars = 8000   # cap on one tool result sent back to the model
+
+[sandbox]
+image = "stage1-sandbox:py312"
+command_timeout_s = 120    # a command still running after this is killed
+output_bytes = 16000       # captured output per command (head + tail kept)
+memory = "1g"
+cpus = "2"
+pids = 256

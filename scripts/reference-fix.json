@@ -1,0 +1,25 @@
+[
+  {
+    "tool": "read_file",
+    "args": {
+      "path": "src/allocation/domain/model.py"
+    }
+  },
+  {
+    "tool": "edit_file",
+    "args": {
+      "path": "src/allocation/domain/model.py",
+      "old": "    def allocate(self, line: OrderLine) -> str:\n        try:\n",
+      "new": "    def allocate(self, line: OrderLine) -> str:\n        for batch in self.batches:\n            if line in batch._allocations:\n                return batch.reference\n        try:\n"
+    }
+  },
+  {
+    "tool": "run_check",
+    "args": {
+      "name": "regression"
+    }
+  },
+  {
+    "final": "Product.allocate now returns the existing batch reference when the line is already allocated. Regression check ran in this session."
+  }
+]

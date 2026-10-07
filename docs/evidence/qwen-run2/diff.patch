@@ -1,0 +1,11 @@
+--- a/src/allocation/domain/model.py
++++ b/src/allocation/domain/model.py
+@@ -25,7 +25,7 @@
+                     batchref=batch.reference,
+                 )
+             )
+-            return batch.reference
++            return batch.reference if line not in batch._allocations else batch.reference
+         except StopIteration:
+             self.events.append(events.OutOfStock(line.sku))
+             return None

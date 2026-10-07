@@ -1,0 +1,34 @@
+# Target repository and task definition for Stage 1.
+# The harness clones the repository once into vendor/ and exports this exact
+# commit into a fresh, disposable workspace for every run.
+
+[target]
+name = "cosmicpython/code"
+url = "https://github.com/cosmicpython/code.git"
+commit = "14c84797ffa77255d53cf1a02fe6aafda2b68aeb"   # master, 2025-06-10
+
+[task]
+request_file = "request.md"          # relative to this file
+acceptance_dir = "acceptance"        # relative to this file; never copied into the workspace
+# The agent may only change files that match these patterns (workspace-relative).
+writable = ["src/allocation/*.py", "src/allocation/**/*.py"]
+# Never writable, even if a pattern above matches.
+protected = ["tests/**", "src/setup.py", "requirements.txt", "Dockerfile", "docker-compose.yml"]
+
+# Commands run inside the sandbox. Workspace is mounted read-only at /work.
+# Tests that need Postgres, Redis or a mail server cannot run without network
+# and are excluded explicitly (they also need services the repo starts with
+# docker-compose, which is out of scope for this task).
+[checks.regression]
+description = "Existing unit and integration tests (pristine copies of tests/)"
+argv = ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests/unit", "tests/integration",
+        "-k", "not test_out_of_stock_email and not test_concurrent_updates_to_version_are_not_allowed"]
+
+[checks.acceptance]
+description = "Hidden acceptance check for the idempotent-allocation rule"
+argv = ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "--rootdir", "/acceptance", "/acceptance"]
+needs_acceptance = true
+
+[checks.compile]
+description = "Compile every module under src/ in memory (syntax check, writes nothing)"
+argv = ["python", "-c", "import pathlib, sys\nbad = 0\nfor p in sorted(pathlib.Path('src').rglob('*.py')):\n    try:\n        compile(p.read_text(), str(p), 'exec')\n    except SyntaxError as e:\n        print(e); bad = 1\nprint('compiled' if not bad else 'syntax errors found')\nsys.exit(bad)"]

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+settings.toml
+vendor/
+runs/
+stage-1-coding-harness.pdf

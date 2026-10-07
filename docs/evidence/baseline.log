@@ -1,0 +1,52 @@
+target cosmicpython/code @ 14c84797ffa77255d53cf1a02fe6aafda2b68aeb
+verifying the untouched starting code in /home/fede/Desktop/facultad/UASTW/ai-dev/stage1/runs/baseline-20261007-123042/baseline
+[verify] PASSED     scope
+[verify] running regression in the sandbox...
+[verify] PASSED     regression
+[verify] running acceptance in the sandbox...
+[verify] FAILED     acceptance
+[verify] running compile in the sandbox...
+[verify] PASSED     compile
+
+========================================================================
+
+Changed files:
+  (none)
+
+Checks (run by the harness in the sandbox, not by the model):
+  PASSED     scope       0 changed file(s), all inside the writable scope
+  PASSED     regression  26 passed, 2 deselected in 0.34s
+  FAILED     acceptance  4 failed, 2 passed in 0.64s (exit 1)
+  PASSED     compile     compiled
+
+--- output of acceptance (failed), last lines ---
+
+/acceptance/test_idempotent_allocation.py:97: AssertionError
+______ test_redelivered_allocate_command_does_not_reserve_a_second_batch _______
+
+bus = <allocation.service_layer.messagebus.MessageBus object at 0x7c40efb20890>
+
+    def test_redelivered_allocate_command_does_not_reserve_a_second_batch(bus):
+        bus.handle(commands.CreateBatch("in-stock", "LAMP", 10, None))
+        bus.handle(commands.CreateBatch("shipment", "LAMP", 10, today))
+        bus.handle(commands.Allocate("o1", "LAMP", 10))
+        bus.handle(commands.Allocate("o1", "LAMP", 10))
+    
+>       assert views.allocations("o1", bus.uow) == [{"sku": "LAMP", "batchref": "in-stock"}]
+E       AssertionError: assert [{'batchref':...sku': 'LAMP'}] == [{'batchref':...sku': 'LAMP'}]
+E         
+E         Left contains one more item: {'batchref': 'shipment', 'sku': 'LAMP'}
+E         Use -v to get more diff
+
+/acceptance/test_idempotent_allocation.py:107: AssertionError
+=========================== short test summary info ============================
+FAILED ../acceptance/test_idempotent_allocation.py::test_product_does_not_emit_a_second_allocated_event
+FAILED ../acceptance/test_idempotent_allocation.py::test_duplicate_line_does_not_spill_into_a_second_batch
+FAILED ../acceptance/test_idempotent_allocation.py::test_redelivered_allocate_command_keeps_one_row_in_the_read_model
+FAILED ../acceptance/test_idempotent_allocation.py::test_redelivered_allocate_command_does_not_reserve_a_second_batch
+4 failed, 2 passed in 0.64s
+
+Verdict: NOT VERIFIED - not passing: acceptance
+Artifacts: /home/fede/Desktop/facultad/UASTW/ai-dev/stage1/runs/baseline-20261007-123042
+
+Expected on the starting code: acceptance FAILS, regression passes -> as expected
